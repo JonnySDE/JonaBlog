@@ -1,0 +1,82 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getPosts, formatDate } from '../../lib/cms';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post) => ({ params: { slug: post.slug }, props: { post } }));
+}
+const { post } = Astro.props;
+---
+<Base title={post.title} slug={post.slug}>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-10 w-full">
+    <!-- Enlace de regreso -->
+    <div class="mb-8">
+      <a href="/" class="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors">
+        ← Volver al inicio
+      </a>
+    </div>
+
+    <article class="bg-white rounded-3xl p-6 sm:p-12 border border-slate-200/90 shadow-sm space-y-8">
+      <!-- Encabezado del artículo -->
+      <header class="space-y-4 border-b border-slate-100 pb-8">
+        {post.categories && post.categories.length > 0 && (
+          <div class="flex flex-wrap gap-2">
+            {post.categories.map((c) => (
+              <a 
+                href={`/categoria/${c.slug}/`} 
+                class="bg-blue-50 text-blue-600 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border border-blue-100 hover:bg-blue-100 transition-colors"
+              >
+                {c.name}
+              </a>
+            ))}
+          </div>
+        )}
+
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+          {post.title}
+        </h1>
+
+        <div class="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-500 pt-2">
+          <time>{formatDate(post.published_at)}</time>
+          <span>•</span>
+          <span>{post.author.name || 'Jonathan Rodríguez'}</span>
+          <span>•</span>
+          <span>{post.reading_minutes} {post.reading_minutes === 1 ? 'minuto' : 'minutos'} de lectura</span>
+        </div>
+      </header>
+
+      <!-- Imagen destacada si existe -->
+      {post.featured_image && (
+        <div class="rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+          <img 
+            src={post.featured_image.url} 
+            alt={post.featured_image.alt_text || post.title} 
+            class="w-full h-auto object-cover max-h-[500px]"
+          />
+        </div>
+      )}
+
+      <!-- Contenido HTML de WordPress -->
+      <div 
+        class="prose max-w-none text-slate-700 leading-relaxed space-y-4 text-base sm:text-lg [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:mt-8 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:text-slate-900 [&_p]:leading-relaxed [&_a]:text-blue-600 [&_a]:underline [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_code]:bg-slate-100 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono [&_pre]:bg-slate-900 [&_pre]:text-slate-100 [&_pre]:p-4 [&_pre]:rounded-xl [&_pre]:overflow-x-auto [&_blockquote]:border-l-4 [&_blockquote]:border-blue-500 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-slate-600" 
+        set:html={post.content_html} 
+      />
+
+      <!-- Etiquetas / Footer del artículo -->
+      {post.tags && post.tags.length > 0 && (
+        <footer class="pt-8 border-t border-slate-100 flex flex-wrap items-center gap-2">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mr-2">Etiquetas:</span>
+          {post.tags.map((t) => (
+            <a 
+              href={`/etiqueta/${t.slug}/`} 
+              class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold px-2.5 py-1 rounded-md transition-colors"
+            >
+              #{t.name}
+            </a>
+          ))}
+        </footer>
+      )}
+    </article>
+  </div>
+</Base>

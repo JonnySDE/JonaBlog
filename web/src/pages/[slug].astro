@@ -1,0 +1,31 @@
+---
+// Páginas estáticas de WordPress (por ejemplo "Acerca de") en /{slug}/
+import Base from '../layouts/Base.astro';
+import { getPages } from '../lib/cms';
+
+export async function getStaticPaths() {
+  const pages = await getPages();
+  return pages.map((page) => ({ params: { slug: page.slug }, props: { page } }));
+}
+const { page } = Astro.props;
+---
+<Base title={page.title}>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-10 w-full space-y-8">
+    <div>
+      <a href="/" class="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors">
+        ← Volver al inicio
+      </a>
+    </div>
+
+    <article class="bg-white rounded-3xl p-6 sm:p-12 border border-slate-200/90 shadow-sm space-y-6">
+      <h1 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+        {page.title}
+      </h1>
+
+      <div 
+        class="prose max-w-none text-slate-700 leading-relaxed space-y-4 text-base sm:text-lg [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-slate-900 [&_h2]:mt-8 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:text-slate-900 [&_p]:leading-relaxed [&_a]:text-blue-600 [&_a]:underline" 
+        set:html={page.content_html} 
+      />
+    </article>
+  </div>
+</Base>
